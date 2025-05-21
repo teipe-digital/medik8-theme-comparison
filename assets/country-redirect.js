@@ -53,7 +53,7 @@ $(() => {
         currentISOalpha2 = countryCode;
 
         if (domain != countryCode) {
-          $.getJSON("//store-pruebas-teipe.myshopify.com/cdn/shop/t/20/assets/countries.json?v=114130126609068580151747773322", function (data) {
+          $.getJSON("//store-pruebas-teipe.myshopify.com/cdn/shop/t/21/assets/countries.json?v=152801771121396958421747830805", function (data) {
             $.each(data, function (id, country) {
               if (currentISOalpha2 == country.isoAlpha2) {
                 countryZone = country.zone;
