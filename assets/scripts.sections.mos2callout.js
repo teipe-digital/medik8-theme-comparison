@@ -1,4 +1,4 @@
-import {KSnavigation,KSautoPlay,KScenterSlides} from "\/\/store-pruebas-teipe.myshopify.com\/cdn\/shop\/t\/20\/assets\/scripts.keenSlider.plugins.js?v=162808386765211230481747773323"
+import {KSnavigation,KSautoPlay,KScenterSlides} from "\/\/store-pruebas-teipe.myshopify.com\/cdn\/shop\/t\/30\/assets\/scripts.keenSlider.plugins.js?v=162808386765211230481748436181"
 
 export class MOS2Callout { 
 

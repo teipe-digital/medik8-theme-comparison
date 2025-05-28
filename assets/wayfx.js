@@ -138,12 +138,12 @@ wayfx.productPage = function (options) {
     if (variant.available) {
       // Available, enable the submit button, change text, show quantity elements
       $addToCart.removeClass('disabled').prop('disabled', false);
-      $addToCartText.html("Añadir al carrito");
+      $addToCartText.html("Translation missing: es.products.product.add_to_cart");
       $quantityElements.show();
     } else {
       // Sold out, disable the submit button, change text, hide quantity elements
       $addToCart.addClass('disabled').prop('disabled', true);
-      $addToCartText.html("Agotado");
+      $addToCartText.html("Translation missing: es.products.product.sold_out");
       $quantityElements.hide();
     }
 
@@ -153,7 +153,7 @@ wayfx.productPage = function (options) {
     // Also update and show the product's compare price if necessary
     if (variant.compare_at_price > variant.price) {
       $comparePrice
-        .html(" Comparar en" + ' ' + Shopify.formatMoney(variant.compare_at_price, moneyFormat))
+        .html("Translation missing: es.products.product.compare_at" + ' ' + Shopify.formatMoney(variant.compare_at_price, moneyFormat))
         .show();
     } else {
       $comparePrice.hide();
@@ -165,7 +165,7 @@ wayfx.productPage = function (options) {
     // To only show available variants, implement linked product options:
     //   - http://docs.shopify.com/manual/configuration/store-customization/advanced-navigation/linked-product-options
     $addToCart.addClass('disabled').prop('disabled', true);
-    $addToCartText.html("No disponible");
+    $addToCartText.html("Translation missing: es.products.product.unavailable");
     $quantityElements.hide();
   }
 };
@@ -249,9 +249,6 @@ wayfx.loginForms = function() {
 wayfx.collectionProgress = function() {
 	var collectionProgress = $('.js-collection-aov');
   if(collectionProgress.length){
-
-
-
     $(window).on('load resize scroll', function () {
       let header = document.querySelector('.wayfx-header')
       header = header.getBoundingClientRect()
@@ -261,14 +258,6 @@ wayfx.collectionProgress = function() {
       messageBar = messageBar?.getBoundingClientRect()
       stickyTop = messageBar ? stickyTop + messageBar.height : stickyTop
       collectionProgress.css('top',stickyTop)
-
-        
-      if (collectionProgress.offset().top - $(this).scrollTop() > stickyTop) {
-        collectionProgress.removeClass('sticky');
-      } else {
-        collectionProgress.addClass('sticky');
-      }
-       
     })
   }
 };
@@ -734,16 +723,45 @@ function addToCart(form_id) {
   });
 }
 
-$('.wayfx-product__grid-variant select').on('change', function() {
+$('.wayfx-product__grid-variant select').on('change', async function(e) {
+  await Promise.all([
+    updateLabel(this, e.target.value),
+    updateOption(this, e.target.value)
+  ]);
   var price = $('option:selected',this).data("price");
   $(this).parent().next('.wayfx-product__grid-price').html(price);
 });
 
 // TODO: remove the wayfx version above after removing up product-grid-item.liquid file
-$('.product__grid-variant select').on('change', function() {
+$('.product__grid-variant select').on('change', async function(e) {
+  await Promise.all([
+    updateLabel(this, e.target.value),
+    updateOption(this, e.target.value)
+  ]);
   var price = $('option:selected',this).data("price");
   $(this).parent().next('.product__grid-price').html(price);
 });
+
+// update the select option for the given variant with label data, if applicable
+async function updateLabel(_this, variant) {
+  const currentLabel = _this.closest('form').querySelector('.label-wrapper')
+  const selectOption = _this.querySelector(`option[value="${variant}"]`);
+
+  if (currentLabel && selectOption.getAttribute('data-label').includes('label-wrapper')) {
+    sitewide && await sitewide.updateSelectOptionLabel(variant, selectOption);
+
+    const labelData = selectOption.getAttribute('data-label')
+    const labelNode = new DOMParser().parseFromString(labelData, 'text/html')
+    labelData && currentLabel.replaceWith(labelNode.body.firstChild)
+  }
+}
+
+// update the select option for the given variant with sitewide price data, if applicable
+async function updateOption(_this, variant) {
+  const priceElement = _this.querySelector(`option[value="${variant}"]`);
+  if (priceElement.getAttribute('data-price').includes('price-v2'))
+    sitewide && await sitewide.updateSelectOptionPrice(variant, priceElement);
+}
 
 function addToCartSuccess(product) {
   setTimeout(function(){
@@ -756,31 +774,6 @@ function addToCartFail(obj, status) {
   console.log('Add to Cart Failed...');
 }
 
-// Smooth Scrolling
-$('a[href*="#"]')
-.not('[href="#"]')
-.not('[href="#0"]')
-.click(function(event) {
-  if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
-    var target = $(this.hash);
-    target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
-    if (target.length) {
-      event.preventDefault();
-      $('html, body').animate({
-        scrollTop: target.offset().top - $('.wayfx-header').outerHeight() - 32
-      }, 600, function() {
-        var $target = $(target);
-        $target.focus();
-        if ($target.is(":focus")) {
-          return false;
-        } else {
-          $target.attr('tabindex','-1');
-          $target.focus();
-        }
-      });
-    }
-  }
-});
 
  $(document).ready(function () {
    var searchWrapper = $(".wayfx-header__search"),
@@ -806,6 +799,9 @@ $('a[href*="#"]')
    mobileNavTrigger.on("click", function() {
      mobileNavMenu.fadeIn(100);
      document.body.style.overflowY = 'hidden'
+
+     const gorgiasIcon = document.getElementById('gorgias-chat-container');
+     gorgiasIcon && (gorgiasIcon.style.zIndex = '0');
    });
 
    mobileNavMenuBack.on("click", function() {
@@ -837,6 +833,8 @@ $('a[href*="#"]')
        mobileNavMenuLevel.hide();
        mobileNavMenuLevel0.show();
      }, 200);
+     const gorgiasIcon = document.getElementById('gorgias-chat-container');
+     gorgiasIcon && (gorgiasIcon.style.zIndex = '1000')
    });
 
    mobileNavLinkLevel0.on("click", function() {
@@ -862,6 +860,7 @@ $('a[href*="#"]')
    $(".wayfx-header__has-dropdown").hover(
      function () {
        $(this).find('.wayfx-header__dropdown').stop(true, true).fadeIn(200);
+       document.body.dispatchEvent(new CustomEvent('hide-country-dropdown'));
      },
      function () {
        $(this).find('.wayfx-header__dropdown').stop(true,true).hide();
